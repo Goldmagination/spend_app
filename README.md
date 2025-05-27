@@ -1,6 +1,6 @@
-# Spend App
+# Spende App
 
-A Flutter project to help you track your spending.
+A Flutter project to help you track charity donations received. "Spende" is German for donation.
 
 ## Getting Started
 

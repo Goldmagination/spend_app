@@ -1,6 +1,6 @@
-# spend_app
+# Spend App
 
-A new Flutter project.
+A Flutter project to help you track your spending.
 
 ## Getting Started
 

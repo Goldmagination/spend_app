@@ -6,7 +6,8 @@ class FullscreenDisplay extends StatefulWidget {
   final double goalAmount;
   final bool goalReached;
 
-  FullscreenDisplay({
+  const FullscreenDisplay({
+    super.key,
     required this.currentAmount,
     required this.goalAmount,
     required this.goalReached,
@@ -181,7 +182,7 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      '\$${widget.currentAmount.toStringAsFixed(0)}',
+                                      '€${widget.currentAmount.toStringAsFixed(0)}',
                                       style: TextStyle(
                                         fontSize: 80,
                                         fontWeight: FontWeight.bold,
@@ -200,7 +201,7 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                       ),
                                     ),
                                     Text(
-                                      'of \$${widget.goalAmount.toStringAsFixed(0)}',
+                                      'of €${widget.goalAmount.toStringAsFixed(0)}',
                                       style: TextStyle(
                                         fontSize: 32,
                                         color: Colors.white.withOpacity(0.8),

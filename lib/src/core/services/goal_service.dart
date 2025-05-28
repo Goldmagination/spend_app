@@ -1,5 +1,6 @@
 import '../models/goal_model.dart';
 import 'dart:math'; // For random ID generation
+import '../models/article_model.dart';
 
 class GoalService {
   // Singleton pattern setup
@@ -11,16 +12,19 @@ class GoalService {
     // Initialize with a default goal for easier testing
     // In a real app, this would be loaded from persistence or an API
     if (_goals.isEmpty) {
-        String defaultId = _generateId();
-        _goals.add(Goal(
-            id: defaultId,
-            name: "Default Project Goal",
-            targetAmount: 1000,
-            currentAmount: 150,
-            isHighlighted: true, // Make the default goal highlighted initially
-            paypalEmail: "default@example.com"
-        ));
-        _highlightedGoalId = defaultId;
+      String defaultId = _generateId();
+      _goals.add(
+        Goal(
+          id: defaultId,
+          name: "Default Project Goal",
+          targetAmount: 1000,
+          currentAmount: 150,
+          isHighlighted: true, // Make the default goal highlighted initially
+          paypalEmail: "default@example.com",
+          articles: [], // Explicitly empty for the default goal
+        ),
+      );
+      _highlightedGoalId = defaultId;
     }
   }
 
@@ -29,12 +33,14 @@ class GoalService {
 
   String _generateId() {
     // Simple random ID generator for this example
-    return DateTime.now().millisecondsSinceEpoch.toString() + 
-           Random().nextInt(99999).toString();
+    return DateTime.now().millisecondsSinceEpoch.toString() +
+        Random().nextInt(99999).toString();
   }
 
   List<Goal> getGoals() {
-    return List.unmodifiable(_goals); // Return a copy to prevent external modification
+    return List.unmodifiable(
+      _goals,
+    ); // Return a copy to prevent external modification
   }
 
   Goal? getGoalById(String id) {
@@ -90,8 +96,8 @@ class GoalService {
       // we can default to highlighting the first one.
       // This ensures there's usually a highlighted goal if any goals exist.
       if (_goals.isNotEmpty && _highlightedGoalId == null) {
-          highlightGoal(_goals.first.id);
-          return _goals.first;
+        highlightGoal(_goals.first.id);
+        return _goals.first;
       }
       return null;
     }
@@ -116,6 +122,45 @@ class GoalService {
     if (highlighted != null) {
       highlighted.currentAmount = 0.0;
       updateGoal(highlighted); // Persist change
+    }
+  }
+
+  // Methods for managing articles within a specific goal
+  void addArticleToGoal(String goalId, Article article) {
+    Goal? goal = getGoalById(goalId);
+    if (goal != null) {
+      // Ensure no duplicate article IDs if that's a constraint
+      if (goal.articles.any((a) => a.id == article.id)) {
+        print('Article with ID ${article.id} already exists in goal $goalId.');
+        return;
+      }
+      goal.articles.add(article);
+      updateGoal(goal); // Save changes to the goal
+    }
+  }
+
+  void removeArticleFromGoal(String goalId, String articleId) {
+    Goal? goal = getGoalById(goalId);
+    if (goal != null) {
+      goal.articles.removeWhere((article) => article.id == articleId);
+      updateGoal(goal);
+    }
+  }
+
+  void updateArticleInGoal(String goalId, Article updatedArticle) {
+    Goal? goal = getGoalById(goalId);
+    if (goal != null) {
+      int articleIndex = goal.articles.indexWhere(
+        (a) => a.id == updatedArticle.id,
+      );
+      if (articleIndex != -1) {
+        goal.articles[articleIndex] = updatedArticle;
+        updateGoal(goal);
+      } else {
+        print(
+          'Article with ID ${updatedArticle.id} not found in goal $goalId for update.',
+        );
+      }
     }
   }
 }

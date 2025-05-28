@@ -9,6 +9,8 @@ import 'core/models/goal_model.dart'; // Import Goal model
 import 'features/admin_panel/screens/admin_panel_screen.dart'; // Import AdminPanelScreen
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MoneyGoalTracker extends StatefulWidget {
+  const MoneyGoalTracker({super.key});
+
   @override
   _MoneyGoalTrackerState createState() => _MoneyGoalTrackerState();
 }
@@ -161,6 +165,168 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
       MaterialPageRoute(builder: (context) => AdminPanelScreen()),
     );
     _loadHighlightedGoal(); // Refresh highlighted goal when returning from admin panel
+  }
+
+  void _showAddCustomAmountDialog() {
+    final formKey = GlobalKey<FormState>();
+    double? customAmount;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          title: Text('Add Custom Amount'),
+          contentPadding: const EdgeInsets.fromLTRB(
+            24.0,
+            20.0,
+            24.0,
+            0.0,
+          ), // Adjust content padding
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: 'Amount (€)',
+                hintText: 'Enter amount',
+                prefixIcon: Icon(Icons.euro_symbol),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ), // Consistent border
+              ),
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an amount';
+                }
+                final number = double.tryParse(value);
+                if (number == null) {
+                  return 'Please enter a valid number';
+                }
+                if (number <= 0) {
+                  return 'Amount must be positive';
+                }
+                return null;
+              },
+              onSaved: (value) {
+                customAmount = double.tryParse(value!);
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(
+                  context,
+                ).primaryColor, // Consistent primary color
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Add'),
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
+                  if (customAmount != null) {
+                    addMoney(customAmount!);
+                    Navigator.of(context).pop();
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddFromItemsBottomSheet() {
+    if (_highlightedGoal == null || _highlightedGoal!.articles.isEmpty) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ), // Rounded top corners
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 16.0,
+            horizontal: 8.0,
+          ), // Main padding for the sheet's content
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  16.0,
+                  8.0,
+                  16.0,
+                  12.0,
+                ), // Title padding
+                child: Text(
+                  'Select an Item to Add',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant, // Theme-aware color
+                  ),
+                ),
+              ),
+              Divider(
+                height: 1,
+                thickness: 1.5,
+                indent: 8,
+                endIndent: 8,
+              ), // Slightly thicker divider
+              LimitedBox(
+                maxHeight: MediaQuery.of(context).size.height * 0.35,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _highlightedGoal!.articles.length,
+                  separatorBuilder: (context, index) =>
+                      Divider(height: 1, indent: 16, endIndent: 16),
+                  itemBuilder: (BuildContext context, int index) {
+                    final article = _highlightedGoal!.articles[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 8.0,
+                      ), // Increased padding
+                      leading: Icon(
+                        Icons.sell_outlined,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      title: Text(
+                        article.name,
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      subtitle: Text(
+                        '€${article.price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      onTap: () {
+                        addMoney(article.price);
+                        Navigator.pop(context); // Close the bottom sheet
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -313,7 +479,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '\$${currentAmount.toStringAsFixed(0)}',
+                                            '€${currentAmount.toStringAsFixed(0)}',
                                             style: TextStyle(
                                               fontSize: 36,
                                               fontWeight: FontWeight.bold,
@@ -323,7 +489,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                             ),
                                           ),
                                           Text(
-                                            'of \$${targetAmount.toStringAsFixed(0)}',
+                                            'of €${targetAmount.toStringAsFixed(0)}',
                                             style: TextStyle(
                                               fontSize: 16,
                                               color: Colors.grey[600],
@@ -381,141 +547,144 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                           );
                         },
                       ),
-                      SizedBox(height: 40),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => addMoney(10),
+                      SizedBox(height: 30),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ), // Consistent padding with main card
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.add_card_outlined, size: 20),
+                              label: Text('Add Custom Amount'),
+                              onPressed: _highlightedGoal != null
+                                  ? _showAddCustomAmountDialog
+                                  : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: Colors
+                                    .green
+                                    .shade600, // Slightly darker green
                                 foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                textStyle: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
                                 ),
-                                elevation: 3,
-                              ),
-                              child: Column(
-                                children: [
-                                  Icon(Icons.add, size: 24),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    '+\$10',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 20),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => addMoney(20),
+                            SizedBox(height: 12), // Standardized spacing
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.list_alt_outlined, size: 20),
+                              label: Text('Add from Items'),
+                              onPressed:
+                                  _highlightedGoal != null &&
+                                      _highlightedGoal!.articles.isNotEmpty
+                                  ? _showAddFromItemsBottomSheet
+                                  : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orangeAccent,
+                                backgroundColor: Colors.blue.shade700,
                                 foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                textStyle: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
                                 ),
-                                elevation: 3,
-                              ),
-                              child: Column(
-                                children: [
-                                  Icon(Icons.add, size: 24),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    '+\$20',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                                disabledBackgroundColor: Colors.grey.shade400,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          OutlinedButton.icon(
-                            icon: Icon(Icons.refresh),
-                            label: Text(
-                              'Reset Goal',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                            SizedBox(
+                              height: 20,
+                            ), // Standardized spacing (slightly more before divider)
+                            Divider(thickness: 1),
+                            SizedBox(height: 12), // Standardized spacing
+                            OutlinedButton.icon(
+                              icon: Icon(Icons.refresh, size: 20),
+                              label: Text(
+                                'Reset Goal',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              onPressed: _highlightedGoal != null
+                                  ? resetGoal
+                                  : null,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.deepPurple.shade700,
+                                side: BorderSide(
+                                  color: Colors.deepPurple.shade300,
+                                  width: 1.5,
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                disabledForegroundColor: Colors.grey.shade400,
                               ),
                             ),
-                            onPressed: resetGoal,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.deepPurple,
-                              side: BorderSide(color: Colors.deepPurple),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 12,
+                            SizedBox(height: 12), // Standardized spacing
+                            ElevatedButton.icon(
+                              icon: Icon(
+                                Icons.display_settings_outlined,
+                                size: 20,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              label: Text(
+                                'Display Mode',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Roboto',
+                                ),
                               ),
-                            ),
-                          ),
-                          ElevatedButton.icon(
-                            icon: Icon(
-                              Icons.display_settings_outlined,
-                            ), // Changed Icon
-                            label: Text(
-                              'Display Mode',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return DeviceSelectionDialog(
-                                    onStartServer: _startWebServer,
-                                    serverUrl: _serverUrl,
-                                    onLocalDisplay: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => FullscreenDisplay(
-                                            currentAmount: currentAmount,
-                                            goalAmount:
-                                                targetAmount, // Use targetAmount from highlighted goal
-                                            goalReached: isGoalAchieved,
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return DeviceSelectionDialog(
+                                      onStartServer: _startWebServer,
+                                      serverUrl: _serverUrl,
+                                      onLocalDisplay: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => FullscreenDisplay(
+                                              currentAmount: currentAmount,
+                                              goalAmount:
+                                                  targetAmount, // Use targetAmount from highlighted goal
+                                              goalReached: isGoalAchieved,
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepPurple,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 12,
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepPurple,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 30,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 3,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 3,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

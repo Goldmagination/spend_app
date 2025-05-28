@@ -4,6 +4,8 @@ import '../../../core/services/goal_service.dart';
 import 'add_edit_goal_screen.dart'; // We'll create this next
 
 class AdminPanelScreen extends StatefulWidget {
+  const AdminPanelScreen({super.key});
+
   @override
   _AdminPanelScreenState createState() => _AdminPanelScreenState();
 }
@@ -56,7 +58,11 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.list_alt_outlined, size: 80, color: Colors.grey[400]),
+                  Icon(
+                    Icons.list_alt_outlined,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
                   SizedBox(height: 20),
                   Text(
                     'No goals yet.',
@@ -85,13 +91,18 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         : BorderSide.none,
                   ),
                   child: ListTile(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 10.0,
+                    ),
                     title: Text(
                       goal.name,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18.0,
-                        color: goal.isHighlighted ? Colors.deepPurpleAccent : Colors.black87,
+                        color: goal.isHighlighted
+                            ? Colors.deepPurpleAccent
+                            : Colors.black87,
                       ),
                     ),
                     subtitle: Column(
@@ -99,19 +110,30 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                       children: [
                         SizedBox(height: 5.0),
                         Text(
-                          'Target: \$${goal.targetAmount.toStringAsFixed(0)}',
-                          style: TextStyle(fontSize: 15.0, color: Colors.grey[700]),
+                          'Target: €${goal.targetAmount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.grey[700],
+                          ),
                         ),
                         Text(
-                          'Current: \$${goal.currentAmount.toStringAsFixed(0)} (${(goal.currentAmount / (goal.targetAmount > 0 ? goal.targetAmount : 1) * 100).toStringAsFixed(1)}%)',
-                          style: TextStyle(fontSize: 15.0, color: Colors.grey[700]),
+                          'Current: €${goal.currentAmount.toStringAsFixed(0)} (${(goal.currentAmount / (goal.targetAmount > 0 ? goal.targetAmount : 1) * 100).toStringAsFixed(1)}%)',
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.grey[700],
+                          ),
                         ),
-                        if (goal.paypalEmail != null && goal.paypalEmail!.isNotEmpty)
+                        if (goal.paypalEmail != null &&
+                            goal.paypalEmail!.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
                               'PayPal: ${goal.paypalEmail}',
-                              style: TextStyle(fontSize: 14.0, color: Colors.grey[600], fontStyle: FontStyle.italic),
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
                           ),
                       ],
@@ -122,27 +144,39 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         IconButton(
                           icon: Icon(
                             goal.isHighlighted ? Icons.star : Icons.star_border,
-                            color: goal.isHighlighted ? Colors.amber : Colors.grey,
+                            color: goal.isHighlighted
+                                ? Colors.amber
+                                : Colors.grey,
                           ),
                           onPressed: () => _highlightGoal(goal.id),
-                          tooltip: goal.isHighlighted ? 'Unhighlight' : 'Highlight',
+                          tooltip: goal.isHighlighted
+                              ? 'Unhighlight'
+                              : 'Highlight',
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete_outline, color: Colors.redAccent),
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: Colors.redAccent,
+                          ),
                           onPressed: () {
                             showDialog(
                               context: context,
                               builder: (BuildContext ctx) {
                                 return AlertDialog(
                                   title: Text('Confirm Delete'),
-                                  content: Text('Are you sure you want to delete "${goal.name}"?'),
+                                  content: Text(
+                                    'Are you sure you want to delete "${goal.name}"?',
+                                  ),
                                   actions: [
                                     TextButton(
                                       child: Text('Cancel'),
                                       onPressed: () => Navigator.of(ctx).pop(),
                                     ),
                                     TextButton(
-                                      child: Text('Delete', style: TextStyle(color: Colors.red)),
+                                      child: Text(
+                                        'Delete',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
                                       onPressed: () {
                                         _deleteGoal(goal.id);
                                         Navigator.of(ctx).pop();
@@ -163,9 +197,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddGoalScreen,
-        child: Icon(Icons.add),
         tooltip: 'Add New Goal',
         backgroundColor: Colors.deepPurpleAccent,
+        child: Icon(Icons.add),
       ),
     );
   }

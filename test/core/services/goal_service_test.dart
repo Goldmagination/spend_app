@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:money_goal_tracker/src/core/models/goal_model.dart';
 import 'package:money_goal_tracker/src/core/services/goal_service.dart';
 import 'dart:math'; // For ID generation in tests if needed
+// Import Article model for tests involving articles
+import 'package:money_goal_tracker/src/core/models/article_model.dart';
 
 void main() {
   group('GoalService Unit Tests', () {
@@ -319,6 +321,3 @@ void main() {
     });
   });
 }
-
-// Import Article model for tests involving articles
-import 'package:money_goal_tracker/src/core/models/article_model.dart';

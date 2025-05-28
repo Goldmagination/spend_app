@@ -1,8 +1,16 @@
-import 'package:flutter/foundation.dart'; // For @required if using older Dart versions, or for general utility.
+import 'package:hive/hive.dart';
 
+part 'article_model.g.dart';
+
+@HiveType(typeId: 0)
 class Article {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String name;
+
+  @HiveField(2)
   final double price;
 
   Article({

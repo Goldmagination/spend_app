@@ -1,12 +1,29 @@
-import 'article_model.dart';
+import 'package:hive/hive.dart';
+import 'article_model.dart'; // Keep this for the Article type
 
+part 'goal_model.g.dart';
+
+@HiveType(typeId: 1)
 class Goal {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   String name;
+
+  @HiveField(2)
   double targetAmount;
+
+  @HiveField(3)
   double currentAmount;
+
+  @HiveField(4)
   bool isHighlighted;
+
+  @HiveField(5)
   String? paypalEmail; // Optional
+
+  @HiveField(6)
   List<Article> articles; // New field
 
   Goal({

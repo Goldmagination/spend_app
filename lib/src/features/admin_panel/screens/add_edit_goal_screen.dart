@@ -8,7 +8,7 @@ import '../../../core/models/article_model.dart'; // Import Article model
 class AddEditGoalScreen extends StatefulWidget {
   final Goal? goalToEdit;
 
-  AddEditGoalScreen({this.goalToEdit});
+  const AddEditGoalScreen({super.key, this.goalToEdit});
 
   @override
   _AddEditGoalScreenState createState() => _AddEditGoalScreenState();
@@ -30,14 +30,16 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
       _name = widget.goalToEdit!.name;
       _targetAmount = widget.goalToEdit!.targetAmount;
       _paypalEmail = widget.goalToEdit!.paypalEmail ?? '';
-      _articles = List<Article>.from(widget.goalToEdit!.articles); // Initialize articles
+      _articles = List<Article>.from(
+        widget.goalToEdit!.articles,
+      ); // Initialize articles
     }
   }
 
   void _saveGoal() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      
+
       if (widget.goalToEdit != null) {
         // Update existing goal
         final updatedGoal = widget.goalToEdit!.copyWith(
@@ -49,7 +51,9 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         _goalService.updateGoal(updatedGoal);
       } else {
         // Add new goal
-        String id = DateTime.now().millisecondsSinceEpoch.toString() + Random().nextInt(99999).toString();
+        String id =
+            DateTime.now().millisecondsSinceEpoch.toString() +
+            Random().nextInt(99999).toString();
         final newGoal = Goal(
           id: id,
           name: _name,
@@ -59,13 +63,16 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         );
         _goalService.addGoal(newGoal);
       }
-      
-      Navigator.pop(context, true); // Return true to indicate a goal was added/changed
+
+      Navigator.pop(
+        context,
+        true,
+      ); // Return true to indicate a goal was added/changed
     }
   }
 
   void _addOrEditArticleDialog({Article? articleToEdit, int? articleIndex}) {
-    final _articleFormKey = GlobalKey<FormState>();
+    final articleFormKey = GlobalKey<FormState>();
     String articleName = articleToEdit?.name ?? '';
     double articlePrice = articleToEdit?.price ?? 0.0;
 
@@ -75,7 +82,7 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         return AlertDialog(
           title: Text(articleToEdit == null ? 'Add Article' : 'Edit Article'),
           content: Form(
-            key: _articleFormKey,
+            key: articleFormKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -94,12 +101,17 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                   initialValue: articlePrice.toStringAsFixed(2),
                   decoration: InputDecoration(labelText: 'Price (€)'),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}'),
+                    ),
+                  ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a price';
                     }
-                    if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                    if (double.tryParse(value) == null ||
+                        double.parse(value) <= 0) {
                       return 'Please enter a valid positive price';
                     }
                     return null;
@@ -117,19 +129,30 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
             TextButton(
               child: Text(articleToEdit == null ? 'Add' : 'Save'),
               onPressed: () {
-                if (_articleFormKey.currentState!.validate()) {
-                  _articleFormKey.currentState!.save();
+                if (articleFormKey.currentState!.validate()) {
+                  articleFormKey.currentState!.save();
                   setState(() {
-                    if (articleToEdit == null) { // Add new
-                      _articles.add(Article(
-                        id: DateTime.now().millisecondsSinceEpoch.toString() + Random().nextInt(1000).toString(), // Simple unique ID for client-side list
-                        name: articleName,
-                        price: articlePrice,
-                      ));
-                    } else { // Edit existing
-                       if (articleIndex != null) {
-                         _articles[articleIndex] = articleToEdit.copyWith(name: articleName, price: articlePrice);
-                       }
+                    if (articleToEdit == null) {
+                      // Add new
+                      _articles.add(
+                        Article(
+                          id:
+                              DateTime.now().millisecondsSinceEpoch.toString() +
+                              Random()
+                                  .nextInt(1000)
+                                  .toString(), // Simple unique ID for client-side list
+                          name: articleName,
+                          price: articlePrice,
+                        ),
+                      );
+                    } else {
+                      // Edit existing
+                      if (articleIndex != null) {
+                        _articles[articleIndex] = articleToEdit.copyWith(
+                          name: articleName,
+                          price: articlePrice,
+                        );
+                      }
                     }
                   });
                   Navigator.of(context).pop();
@@ -153,7 +176,8 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView( // Use ListView to prevent overflow on smaller screens
+          child: ListView(
+            // Use ListView to prevent overflow on smaller screens
             children: <Widget>[
               TextFormField(
                 initialValue: _name, // Set initial value
@@ -172,7 +196,9 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               ),
               SizedBox(height: 20),
               TextFormField(
-                initialValue: _targetAmount > 0 ? _targetAmount.toStringAsFixed(2) : '', // Set initial value
+                initialValue: _targetAmount > 0
+                    ? _targetAmount.toStringAsFixed(2)
+                    : '', // Set initial value
                 decoration: InputDecoration(
                   labelText: 'Target Amount (€)',
                   border: OutlineInputBorder(),
@@ -186,7 +212,8 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a target amount';
                   }
-                  if (double.tryParse(value) == null || double.parse(value) <= 0) {
+                  if (double.tryParse(value) == null ||
+                      double.parse(value) <= 0) {
                     return 'Please enter a valid positive amount';
                   }
                   return null;
@@ -208,13 +235,21 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
               SizedBox(height: 20),
               Divider(thickness: 1.5),
               SizedBox(height: 10),
-              Text('Articles / Items for this Goal', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Articles / Items for this Goal',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               SizedBox(height: 10),
               _articles.isEmpty
-                  ? Center(child: Text('No articles added yet. Click "Add Article" to start.'))
+                  ? Center(
+                      child: Text(
+                        'No articles added yet. Click "Add Article" to start.',
+                      ),
+                    )
                   : ListView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(), // To use inside another ListView
+                      physics:
+                          NeverScrollableScrollPhysics(), // To use inside another ListView
                       itemCount: _articles.length,
                       itemBuilder: (context, index) {
                         final article = _articles[index];
@@ -223,17 +258,28 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                           margin: EdgeInsets.symmetric(vertical: 4),
                           child: ListTile(
                             title: Text(article.name),
-                            subtitle: Text('Price: €${article.price.toStringAsFixed(2)}'),
+                            subtitle: Text(
+                              'Price: €${article.price.toStringAsFixed(2)}',
+                            ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.edit_outlined, color: Colors.blueGrey),
-                                  onPressed: () => _addOrEditArticleDialog(articleToEdit: article, articleIndex: index),
+                                  icon: Icon(
+                                    Icons.edit_outlined,
+                                    color: Colors.blueGrey,
+                                  ),
+                                  onPressed: () => _addOrEditArticleDialog(
+                                    articleToEdit: article,
+                                    articleIndex: index,
+                                  ),
                                   tooltip: 'Edit Article',
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.delete_outline, color: Colors.redAccent),
+                                  icon: Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.redAccent,
+                                  ),
                                   onPressed: () {
                                     setState(() {
                                       _articles.removeAt(index);
@@ -253,13 +299,13 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                 label: Text('Add Article'),
                 onPressed: () => _addOrEditArticleDialog(),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.deepPurpleAccent, side: BorderSide(color: Colors.deepPurpleAccent),
+                  foregroundColor: Colors.deepPurpleAccent,
+                  side: BorderSide(color: Colors.deepPurpleAccent),
                 ),
               ),
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _saveGoal,
-                child: Text(widget.goalToEdit == null ? 'Save New Goal' : 'Update Goal', style: TextStyle(fontSize: 18)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurpleAccent,
                   foregroundColor: Colors.white,
@@ -267,6 +313,10 @@ class _AddEditGoalScreenState extends State<AddEditGoalScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
+                ),
+                child: Text(
+                  widget.goalToEdit == null ? 'Save New Goal' : 'Update Goal',
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
             ],

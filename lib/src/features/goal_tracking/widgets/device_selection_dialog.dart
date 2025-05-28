@@ -6,7 +6,8 @@ class DeviceSelectionDialog extends StatefulWidget {
   final String? serverUrl;
   final VoidCallback onLocalDisplay;
 
-  DeviceSelectionDialog({
+  const DeviceSelectionDialog({
+    super.key,
     required this.onStartServer,
     required this.serverUrl,
     required this.onLocalDisplay,
@@ -29,7 +30,7 @@ class _DeviceSelectionDialogState extends State<DeviceSelectionDialog> {
           Text('Display Options'),
         ],
       ),
-      content: Container(
+      content: SizedBox(
         width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,

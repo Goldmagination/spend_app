@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import '../../../core/services/goal_service.dart'; // Import GoalService
-import '../../../core/models/goal_model.dart';    // Import Goal model
+import '../../../core/models/goal_model.dart'; // Import Goal model
 
 class GoalDisplayServer {
   HttpServer? _server;
@@ -69,7 +69,12 @@ class GoalDisplayServer {
     double target = highlightedGoal?.targetAmount ?? 0;
     bool reached = highlightedGoal != null && target > 0 && current >= target;
 
-    final html = _generateDisplayHTML(current, target, reached, highlightedGoal?.name);
+    final html = _generateDisplayHTML(
+      current,
+      target,
+      reached,
+      highlightedGoal?.name,
+    );
     request.response.headers.contentType = ContentType.html;
     request.response.write(html);
     request.response.close();
@@ -78,7 +83,8 @@ class GoalDisplayServer {
   void _serveApiData(HttpRequest request) {
     Goal? highlightedGoal = _goalService.getHighlightedGoal();
     double current = highlightedGoal?.currentAmount ?? 0;
-    double target = highlightedGoal?.targetAmount ?? 0; // Ensure target is not null
+    double target =
+        highlightedGoal?.targetAmount ?? 0; // Ensure target is not null
     bool reached = highlightedGoal != null && target > 0 && current >= target;
     double progress = (target > 0) ? (current / target).clamp(0.0, 1.0) : 0.0;
 
@@ -103,17 +109,20 @@ class GoalDisplayServer {
       if (interfaces.isNotEmpty) {
         for (var interface in interfaces) {
           for (var addr in interface.addresses) {
-            if (!addr.isLinkLocal) { // Prioritize non-link-local
+            if (!addr.isLinkLocal) {
+              // Prioritize non-link-local
               return addr.address;
             }
           }
         }
         // Fallback: if only link-local are found, return the first one of those.
         for (var interface in interfaces) {
-            if (interface.addresses.isNotEmpty) {
-                print('Warning: No non-link-local IP found. Falling back to the first available IP which might be link-local: ${interface.addresses.first.address}');
-                return interface.addresses.first.address;
-            }
+          if (interface.addresses.isNotEmpty) {
+            print(
+              'Warning: No non-link-local IP found. Falling back to the first available IP which might be link-local: ${interface.addresses.first.address}',
+            );
+            return interface.addresses.first.address;
+          }
         }
       }
     } catch (e) {
@@ -123,10 +132,17 @@ class GoalDisplayServer {
     return null;
   }
 
-  String _generateDisplayHTML(double current, double goal, bool reached, String? goalName) {
+  String _generateDisplayHTML(
+    double current,
+    double goal,
+    bool reached,
+    String? goalName,
+  ) {
     goalName = goalName ?? "No Goal Selected";
     double progress = (goal > 0) ? (current / goal).clamp(0.0, 1.0) : 0.0;
-    String serverStatusMessage = _serverUrl == null ? "<p style='color:red;'>Server not running or IP not found.</p>" : "";
+    String serverStatusMessage = _serverUrl == null
+        ? "<p style='color:red;'>Server not running or IP not found.</p>"
+        : "";
 
     return '''
 <!DOCTYPE html>
@@ -134,7 +150,7 @@ class GoalDisplayServer {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${goalName} - Goal Display</title>
+  <title>$goalName - Goal Display</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f6f8; transition: background-color 0.5s ease; color: #333; }
     body.goal-achieved { background-color: #e8f5e9; /* Softer green */ }
@@ -162,7 +178,7 @@ class GoalDisplayServer {
 </head>
 <body id="body" class="${reached ? 'goal-achieved' : ''}">
   <div class="container">
-    <div class="goal-title" id="goalNameDisplay">${goalName}</div>
+    <div class="goal-title" id="goalNameDisplay">$goalName</div>
     <div class="title">Goal Progress</div>
     <div class="progress-container">
       <svg class="progress-circle" viewBox="0 0 100 100">
@@ -178,7 +194,7 @@ class GoalDisplayServer {
     <div class="celebration" id="celebration" style="${reached ? 'display: block;' : 'display: none;'}">
       🎉 Goal Achieved! 🎉
     </div>
-    <div class="server-status" id="serverStatus">${serverStatusMessage}</div>
+    <div class="server-status" id="serverStatus">$serverStatusMessage</div>
   </div>
 
   <script>

@@ -9,6 +9,8 @@ import 'core/models/goal_model.dart'; // Import Goal model
 import 'features/admin_panel/screens/admin_panel_screen.dart'; // Import AdminPanelScreen
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MoneyGoalTracker extends StatefulWidget {
+  const MoneyGoalTracker({super.key});
+
   @override
   _MoneyGoalTrackerState createState() => _MoneyGoalTrackerState();
 }
@@ -164,7 +168,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
   }
 
   void _showAddCustomAmountDialog() {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     double? customAmount;
 
     showDialog(
@@ -182,7 +186,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
             0.0,
           ), // Adjust content padding
           content: Form(
-            key: _formKey,
+            key: formKey,
             child: TextFormField(
               autofocus: true,
               decoration: InputDecoration(
@@ -226,8 +230,8 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
               ),
               child: Text('Add'),
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
                   if (customAmount != null) {
                     addMoney(customAmount!);
                     Navigator.of(context).pop();

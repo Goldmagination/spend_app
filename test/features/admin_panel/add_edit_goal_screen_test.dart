@@ -8,6 +8,7 @@ import 'package:spend_app/src/features/admin_panel/screens/add_edit_goal_screen.
 import 'package:spend_app/src/core/models/article_model.dart';
 
 // Use the existing mocks from admin_panel_screen_test.dart
+import 'admin_panel_screen_test.dart';
 import 'admin_panel_screen_test.mocks.dart';
 
 // Helper function to wrap widgets for testing
@@ -357,7 +358,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        verify(mockObserver.didPush(any, any)).called(1); // Initial push
+        verify(
+          mockObserver.didPush(any<Route<dynamic>?>(), any<Route<dynamic>?>()),
+        ).called(1); // Initial push
 
         // Fill main goal form
         await tester.enterText(
@@ -401,7 +404,9 @@ void main() {
         expect(savedGoal.articles.first.price, 22.50);
 
         // Verify navigation pop
-        verify(mockObserver.didPop(any, any)).called(1);
+        verify(
+          mockObserver.didPop(any<Route<dynamic>>(), any<Route<dynamic>>()),
+        ).called(1);
 
         // Cleanup
         realGoalService.deleteGoal(savedGoal.id);
@@ -429,7 +434,9 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        verify(mockObserver.didPush(any, any)).called(1);
+        verify(
+          mockObserver.didPush(any<Route<dynamic>>(), any<Route<dynamic>>()),
+        ).called(1);
 
         // Edit main goal form
         await tester.enterText(
@@ -475,7 +482,9 @@ void main() {
         expect(updatedGoal.articles.first.price, 30.00);
 
         // Verify navigation pop
-        verify(mockObserver.didPop(any, any)).called(1);
+        verify(
+          mockObserver.didPop(any<Route<dynamic>>(), any<Route<dynamic>>()),
+        ).called(1);
 
         // Cleanup
         realGoalService.deleteGoal(updatedGoal.id);

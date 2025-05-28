@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:spend_app/main.dart'; // Assuming MyApp is in main.dart
+// Assuming MyApp is in main.dart
 import 'package:spend_app/src/app.dart'; // MoneyGoalTracker
 import 'package:spend_app/src/core/models/goal_model.dart';
 import 'package:spend_app/src/core/models/article_model.dart';
 import 'package:spend_app/src/core/services/goal_service.dart';
-
-import 'features/admin_panel/admin_panel_screen_test.mocks.dart';
 
 Widget createTestableMoneyGoalTrackerScreen() {
   // This helper should ideally allow injecting a mock GoalService if DI was used.

@@ -6,7 +6,8 @@ class FullscreenDisplay extends StatefulWidget {
   final double goalAmount;
   final bool goalReached;
 
-  FullscreenDisplay({
+  const FullscreenDisplay({
+    super.key,
     required this.currentAmount,
     required this.goalAmount,
     required this.goalReached,

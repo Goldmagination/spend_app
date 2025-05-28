@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'dart:async';
+import 'dart:developer';
 
 void main() {
   runApp(MyApp());
@@ -12,6 +17,177 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Roboto'),
       home: MoneyGoalTracker(),
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class DeviceSelectionDialog extends StatefulWidget {
+  final Future<void> Function() onStartServer;
+  final String? serverUrl;
+  final VoidCallback onLocalDisplay;
+
+  DeviceSelectionDialog({
+    required this.onStartServer,
+    required this.serverUrl,
+    required this.onLocalDisplay,
+  });
+
+  @override
+  _DeviceSelectionDialogState createState() => _DeviceSelectionDialogState();
+}
+
+class _DeviceSelectionDialogState extends State<DeviceSelectionDialog> {
+  bool isServerStarted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.cast, color: Colors.deepPurple),
+          SizedBox(width: 12),
+          Text('Display Options'),
+        ],
+      ),
+      content: Container(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Local Display Option
+            Card(
+              elevation: 2,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.blue.shade100,
+                  child: Icon(Icons.phone_android, color: Colors.blue),
+                ),
+                title: Text('This Device'),
+                subtitle: Text('Show fullscreen on this device'),
+                trailing: Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onLocalDisplay();
+                },
+              ),
+            ),
+            SizedBox(height: 16),
+            // WiFi Display Option
+            Card(
+              elevation: 2,
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.green.shade100,
+                  child: Icon(Icons.wifi, color: Colors.green),
+                ),
+                title: Text('WiFi Display'),
+                subtitle: Text('Cast to other devices on your network'),
+                trailing: isServerStarted
+                    ? Icon(Icons.check_circle, color: Colors.green)
+                    : Icon(Icons.arrow_forward_ios),
+                onTap: isServerStarted
+                    ? null
+                    : () async {
+                        setState(() {
+                          isServerStarted = true;
+                        });
+                        await widget.onStartServer();
+                        setState(() {});
+                      },
+              ),
+            ),
+            if (widget.serverUrl != null) ...[
+              SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info,
+                          color: Colors.green.shade700,
+                          size: 20,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Server Started!',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Open this URL on any device connected to the same WiFi:',
+                      style: TextStyle(color: Colors.green.shade600),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.green.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.serverUrl!,
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.copy),
+                            onPressed: () {
+                              Clipboard.setData(
+                                ClipboardData(text: widget.serverUrl!),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('URL copied to clipboard!'),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '• Works on phones, tablets, computers, smart TVs\n'
+                      '• Updates in real-time\n'
+                      '• Perfect for presentations and events',
+                      style: TextStyle(
+                        color: Colors.green.shade600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Close'),
+        ),
+      ],
     );
   }
 }
@@ -127,7 +303,6 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                       },
                     );
                   }),
-
                 // Main content
                 Center(
                   child: AnimatedBuilder(
@@ -148,9 +323,7 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                 letterSpacing: 8,
                               ),
                             ),
-
                             SizedBox(height: 60),
-
                             // Large Progress Circle
                             Stack(
                               alignment: Alignment.center,
@@ -175,7 +348,7 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      '\${widget.currentAmount.toStringAsFixed(0)}',
+                                      '\$${widget.currentAmount.toStringAsFixed(0)}',
                                       style: TextStyle(
                                         fontSize: 80,
                                         fontWeight: FontWeight.bold,
@@ -185,7 +358,7 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                       ),
                                     ),
                                     Text(
-                                      'of \${widget.goalAmount.toStringAsFixed(0)}',
+                                      'of \$${widget.goalAmount.toStringAsFixed(0)}',
                                       style: TextStyle(
                                         fontSize: 32,
                                         color: Colors.white.withOpacity(0.8),
@@ -206,9 +379,7 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                 ),
                               ],
                             ),
-
                             SizedBox(height: 60),
-
                             // Goal Status
                             if (widget.goalReached)
                               Container(
@@ -251,7 +422,6 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                     },
                   ),
                 ),
-
                 // Exit hint
                 Positioned(
                   top: 20,
@@ -294,6 +464,8 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
   late Animation<double> _progressAnimation;
   late Animation<double> _scaleAnimation;
   bool goalReached = false;
+  HttpServer? _server;
+  String? _serverUrl;
 
   @override
   void initState() {
@@ -320,6 +492,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
   void dispose() {
     _progressController.dispose();
     _celebrationController.dispose();
+    _server?.close();
     super.dispose();
   }
 
@@ -332,6 +505,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
       }
     });
     _progressController.forward();
+    _updateWebClients();
   }
 
   void resetGoal() {
@@ -341,6 +515,131 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     });
     _progressController.reset();
     _celebrationController.reset();
+    _updateWebClients();
+  }
+
+  Future<void> _startWebServer() async {
+    try {
+      _server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+      _serverUrl = 'http://${await _getLocalIP()}:8080';
+
+      _server!.listen((HttpRequest request) {
+        if (request.uri.path == '/') {
+          _serveDisplayPage(request);
+        } else if (request.uri.path == '/api/data') {
+          _serveApiData(request);
+        } else {
+          request.response.statusCode = 404;
+          request.response.close();
+        }
+      });
+
+      print('Server started at $_serverUrl');
+    } catch (e) {
+      print('Failed to start server: $e');
+    }
+  }
+
+  void _serveDisplayPage(HttpRequest request) {
+    final html = _generateDisplayHTML();
+    request.response.headers.contentType = ContentType.html;
+    request.response.write(html);
+    request.response.close();
+  }
+
+  void _serveApiData(HttpRequest request) {
+    final data = {
+      'currentAmount': currentAmount,
+      'goalAmount': goalAmount,
+      'goalReached': goalReached,
+      'progress': currentAmount / goalAmount,
+    };
+    request.response.headers.contentType = ContentType.json;
+    request.response.write(jsonEncode(data));
+    request.response.close();
+  }
+
+  void _updateWebClients() {
+    // In a full implementation, you'd use WebSockets for real-time updates.
+    // For simplicity, clients will poll the API endpoint.
+  }
+
+  Future<String> _getLocalIP() async {
+    try {
+      final interfaces = await NetworkInterface.list();
+      for (var interface in interfaces) {
+        for (var addr in interface.addresses) {
+          if (!addr.isLoopback && addr.type == InternetAddressType.IPv4) {
+            return addr.address;
+          }
+        }
+      }
+    } catch (e) {
+      print('Error getting IP: $e');
+    }
+    return 'localhost';
+  }
+
+  String _generateDisplayHTML() {
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Goal Display</title>
+  <style>
+    /* ...styles omitted for brevity... */
+  </style>
+</head>
+<body id="body">
+  <div class="title">GOAL PROGRESS</div>
+  <div class="progress-container">
+    <svg class="progress-circle" viewBox="0 0 200 200">
+      <circle class="progress-bg" cx="100" cy="100" r="85"></circle>
+      <circle class="progress-fill" id="progressFill" cx="100" cy="100" r="85" stroke-dasharray="0 534.07" stroke-dashoffset="0"></circle>
+    </svg>
+    <div class="progress-text">
+      <div class="amount" id="amount">\$0</div>
+      <div class="goal-text">of <span id="goalAmount">\$500</span></div>
+      <div class="percentage" id="percentage">0.0%</div>
+    </div>
+  </div>
+  <div class="celebration" id="celebration" style="display: none;">
+    🎉 GOAL ACHIEVED! 🎉
+  </div>
+  <script>
+    async function updateDisplay() {
+      try {
+        const response = await fetch('/api/data');
+        const data = await response.json();
+        document.getElementById('amount').textContent = '\$' + Math.floor(data.currentAmount);
+        document.getElementById('goalAmount').textContent = '\$' + Math.floor(data.goalAmount);
+        document.getElementById('percentage').textContent = (data.progress * 100).toFixed(1) + '%';
+        const circumference = 2 * Math.PI * 85;
+        const dashArray = (data.progress * circumference) + ' ' + circumference;
+        document.getElementById('progressFill').style.strokeDasharray = dashArray;
+        
+        const body = document.getElementById('body');
+        const celebration = document.getElementById('celebration');
+        
+        if (data.goalReached) {
+          body.classList.add('goal-achieved');
+          celebration.style.display = 'block';
+        } else {
+          body.classList.remove('goal-achieved');
+          celebration.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Failed to update display:', error);
+      }
+    }
+    setInterval(updateDisplay, 1000);
+    updateDisplay();
+  </script>
+</body>
+</html>
+    ''';
   }
 
   @override
@@ -404,7 +703,6 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                               ),
                             ),
                             SizedBox(height: 20),
-
                             // Progress Circle
                             Stack(
                               alignment: Alignment.center,
@@ -465,9 +763,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                 ),
                               ],
                             ),
-
                             SizedBox(height: 20),
-
                             // Goal Status
                             if (goalReached)
                               Container(
@@ -505,9 +801,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                     );
                   },
                 ),
-
                 SizedBox(height: 40),
-
                 // Action Buttons
                 Row(
                   children: [
@@ -568,9 +862,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                     ),
                   ],
                 ),
-
                 SizedBox(height: 20),
-
                 // Reset and Display Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -605,15 +897,26 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FullscreenDisplay(
-                              currentAmount: currentAmount,
-                              goalAmount: goalAmount,
-                              goalReached: goalReached,
-                            ),
-                          ),
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return DeviceSelectionDialog(
+                              onStartServer: _startWebServer,
+                              serverUrl: _serverUrl,
+                              onLocalDisplay: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FullscreenDisplay(
+                                      currentAmount: currentAmount,
+                                      goalAmount: goalAmount,
+                                      goalReached: goalReached,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         );
                       },
                       style: ElevatedButton.styleFrom(

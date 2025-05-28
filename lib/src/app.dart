@@ -60,7 +60,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     );
 
     _loadHighlightedGoal();
-    _updateServerData(); // Initial update for the server
+    // _updateServerData(); // Initial update for the server - REMOVED
   }
 
   @override
@@ -79,21 +79,21 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
         _celebrationController.reset();
       }
     });
-    _updateServerData();
+    // _updateServerData(); - REMOVED
   }
 
-  void _updateServerData() {
-    if (_highlightedGoal != null) {
-      _serverService.updateGoalData(
-        _highlightedGoal!.currentAmount,
-        _highlightedGoal!.targetAmount,
-        _highlightedGoal!.currentAmount >= _highlightedGoal!.targetAmount && _highlightedGoal!.targetAmount > 0,
-      );
-    } else {
-      // Send default/empty data if no goal is highlighted
-      _serverService.updateGoalData(0, 0, false);
-    }
-  }
+  // void _updateServerData() { // METHOD REMOVED
+  //   if (_highlightedGoal != null) {
+  //     _serverService.updateGoalData(
+  //       _highlightedGoal!.currentAmount,
+  //       _highlightedGoal!.targetAmount,
+  //       _highlightedGoal!.currentAmount >= _highlightedGoal!.targetAmount && _highlightedGoal!.targetAmount > 0,
+  //     );
+  //   } else {
+  //     // Send default/empty data if no goal is highlighted
+  //     _serverService.updateGoalData(0, 0, false);
+  //   }
+  // }
 
   void addMoney(double amount) {
     if (_highlightedGoal == null) return;
@@ -112,7 +112,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     });
     _goalService.updateGoal(_highlightedGoal!); // Update in service
     _progressController.forward(from:0.0);
-    _updateServerData();
+    // _updateServerData(); - REMOVED
   }
 
   void resetGoal() {
@@ -124,7 +124,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     _goalService.updateGoal(_highlightedGoal!); // Update in service
     _progressController.reset();
     _celebrationController.reset();
-    _updateServerData();
+    // _updateServerData(); - REMOVED
   }
 
   Future<void> _startWebServer() async {
@@ -134,7 +134,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
       _serverUrl = url;
     });
     if (url != null) {
-      _updateServerData(); 
+      // _updateServerData(); - REMOVED (Server pulls data directly from GoalService now)
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

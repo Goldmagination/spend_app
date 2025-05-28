@@ -5,7 +5,7 @@ import 'features/goal_tracking/widgets/device_selection_dialog.dart';
 import 'features/goal_tracking/widgets/fullscreen_display.dart';
 import 'features/goal_tracking/services/server_service.dart';
 import 'core/services/goal_service.dart'; // Import GoalService
-import 'core/models/goal_model.dart';    // Import Goal model
+import 'core/models/goal_model.dart'; // Import Goal model
 import 'features/admin_panel/screens/admin_panel_screen.dart'; // Import AdminPanelScreen
 
 class MyApp extends StatelessWidget {
@@ -13,7 +13,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Money Goal Tracker',
-      theme: ThemeData(primarySwatch: Colors.deepPurple, fontFamily: 'Roboto'), // Changed to deepPurple
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        fontFamily: 'Roboto',
+      ), // Changed to deepPurple
       home: MoneyGoalTracker(),
       debugShowCheckedModeBanner: false,
     );
@@ -27,7 +30,6 @@ class MoneyGoalTracker extends StatefulWidget {
 
 class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     with TickerProviderStateMixin {
-  
   late AnimationController _progressController;
   late AnimationController _celebrationController;
   late Animation<double> _progressAnimation;
@@ -35,7 +37,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
 
   final GoalService _goalService = GoalService();
   final GoalDisplayServer _serverService = GoalDisplayServer();
-  
+
   Goal? _highlightedGoal;
   String? _serverUrl;
 
@@ -75,7 +77,8 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     setState(() {
       _highlightedGoal = _goalService.getHighlightedGoal();
       // Reset celebration if the highlighted goal changed or no goal is highlighted
-      if (_highlightedGoal == null || (_highlightedGoal!.currentAmount < _highlightedGoal!.targetAmount)) {
+      if (_highlightedGoal == null ||
+          (_highlightedGoal!.currentAmount < _highlightedGoal!.targetAmount)) {
         _celebrationController.reset();
       }
     });
@@ -102,16 +105,20 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
       _highlightedGoal!.currentAmount += amount;
       // Cap current amount at target amount if you prefer, for now, it can exceed.
       // _highlightedGoal!.currentAmount = _highlightedGoal!.currentAmount.clamp(0, _highlightedGoal!.targetAmount);
-      
-      bool goalWasReached = _highlightedGoal!.currentAmount - amount >= _highlightedGoal!.targetAmount;
-      bool goalIsNowReached = _highlightedGoal!.currentAmount >= _highlightedGoal!.targetAmount && _highlightedGoal!.targetAmount > 0;
+
+      bool goalWasReached =
+          _highlightedGoal!.currentAmount - amount >=
+          _highlightedGoal!.targetAmount;
+      bool goalIsNowReached =
+          _highlightedGoal!.currentAmount >= _highlightedGoal!.targetAmount &&
+          _highlightedGoal!.targetAmount > 0;
 
       if (goalIsNowReached && !goalWasReached) {
         _celebrationController.forward();
       }
     });
     _goalService.updateGoal(_highlightedGoal!); // Update in service
-    _progressController.forward(from:0.0);
+    _progressController.forward(from: 0.0);
     // _updateServerData(); - REMOVED
   }
 
@@ -138,7 +145,11 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error starting server. IP could not be determined or server failed.')),
+          SnackBar(
+            content: Text(
+              'Error starting server. IP could not be determined or server failed.',
+            ),
+          ),
         );
       }
     }
@@ -155,15 +166,18 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
   @override
   Widget build(BuildContext context) {
     final currentAmount = _highlightedGoal?.currentAmount ?? 0.0;
-    final targetAmount = _highlightedGoal?.targetAmount ?? 0.0; // Default to 0 if no goal, prevents NaN
+    final targetAmount =
+        _highlightedGoal?.targetAmount ??
+        0.0; // Default to 0 if no goal, prevents NaN
     final goalName = _highlightedGoal?.name ?? "No Goal Selected";
-    final bool isGoalAchieved = targetAmount > 0 && currentAmount >= targetAmount;
+    final bool isGoalAchieved =
+        targetAmount > 0 && currentAmount >= targetAmount;
 
     double progress = 0.0;
     if (targetAmount > 0) {
       progress = (currentAmount / targetAmount).clamp(0.0, 1.0);
     }
-    
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -187,11 +201,19 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.highlight_off_outlined, size: 80, color: Colors.grey[400]),
+                  Icon(
+                    Icons.highlight_off_outlined,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
                   SizedBox(height: 20),
                   Text(
                     'No Goal Highlighted',
-                    style: TextStyle(fontSize: 22, color: Colors.grey[700], fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   SizedBox(height: 10),
                   Text(
@@ -207,13 +229,17 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
             )
-          : Container( // Main content when a goal is highlighted
+          : Container(
+              // Main content when a goal is highlighted
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -267,30 +293,41 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                           animation: _progressAnimation,
                                           builder: (context, child) {
                                             return CircularProgressIndicator(
-                                              value: progress * _progressAnimation.value,
+                                              value:
+                                                  progress *
+                                                  _progressAnimation.value,
                                               strokeWidth: 12,
                                               backgroundColor: Colors.grey[300],
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                isGoalAchieved ? Colors.green : Colors.deepPurple,
-                                              ),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    isGoalAchieved
+                                                        ? Colors.green
+                                                        : Colors.deepPurple,
+                                                  ),
                                             );
                                           },
                                         ),
                                       ),
                                       Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Text(
                                             '\$${currentAmount.toStringAsFixed(0)}',
                                             style: TextStyle(
                                               fontSize: 36,
                                               fontWeight: FontWeight.bold,
-                                              color: isGoalAchieved ? Colors.green : Colors.deepPurple,
+                                              color: isGoalAchieved
+                                                  ? Colors.green
+                                                  : Colors.deepPurple,
                                             ),
                                           ),
                                           Text(
                                             'of \$${targetAmount.toStringAsFixed(0)}',
-                                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey[600],
+                                            ),
                                           ),
                                           SizedBox(height: 8),
                                           Text(
@@ -298,7 +335,9 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                             style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w600,
-                                              color: isGoalAchieved ? Colors.green : Colors.deepPurple,
+                                              color: isGoalAchieved
+                                                  ? Colors.green
+                                                  : Colors.deepPurple,
                                             ),
                                           ),
                                         ],
@@ -308,7 +347,10 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                   SizedBox(height: 20),
                                   if (isGoalAchieved)
                                     Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.green.shade100,
                                         borderRadius: BorderRadius.circular(25),
@@ -316,9 +358,20 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(Icons.celebration, color: Colors.green, size: 24),
+                                          Icon(
+                                            Icons.celebration,
+                                            color: Colors.green,
+                                            size: 24,
+                                          ),
                                           SizedBox(width: 8),
-                                          Text('Goal Achieved! 🎉', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16)),
+                                          Text(
+                                            'Goal Achieved! 🎉',
+                                            style: TextStyle(
+                                              color: Colors.green,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -338,10 +391,24 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                 backgroundColor: Colors.blueAccent,
                                 foregroundColor: Colors.white,
                                 padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 elevation: 3,
                               ),
-                              child: Column(children: [Icon(Icons.add, size: 24), SizedBox(height: 4), Text('+\$10', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))]),
+                              child: Column(
+                                children: [
+                                  Icon(Icons.add, size: 24),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '+\$10',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           SizedBox(width: 20),
@@ -352,10 +419,24 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                 backgroundColor: Colors.orangeAccent,
                                 foregroundColor: Colors.white,
                                 padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 elevation: 3,
                               ),
-                              child: Column(children: [Icon(Icons.add, size: 24), SizedBox(height: 4), Text('+\$20', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))]),
+                              child: Column(
+                                children: [
+                                  Icon(Icons.add, size: 24),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '+\$20',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -366,18 +447,37 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                         children: [
                           OutlinedButton.icon(
                             icon: Icon(Icons.refresh),
-                            label: Text('Reset Goal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            label: Text(
+                              'Reset Goal',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             onPressed: resetGoal,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.deepPurple,
                               side: BorderSide(color: Colors.deepPurple),
-                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                           ElevatedButton.icon(
-                            icon: Icon(Icons.display_settings_outlined), // Changed Icon
-                            label: Text('Display Mode', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            icon: Icon(
+                              Icons.display_settings_outlined,
+                            ), // Changed Icon
+                            label: Text(
+                              'Display Mode',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -391,7 +491,8 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                         MaterialPageRoute(
                                           builder: (context) => FullscreenDisplay(
                                             currentAmount: currentAmount,
-                                            goalAmount: targetAmount, // Use targetAmount from highlighted goal
+                                            goalAmount:
+                                                targetAmount, // Use targetAmount from highlighted goal
                                             goalReached: isGoalAchieved,
                                           ),
                                         ),
@@ -404,8 +505,13 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               elevation: 3,
                             ),
                           ),

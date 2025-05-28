@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'src/app.dart'; // Adjusted import path
+import 'src/app.dart';
 
 void main() {
   runApp(MyApp());

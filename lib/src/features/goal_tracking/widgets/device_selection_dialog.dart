@@ -18,7 +18,14 @@ class DeviceSelectionDialog extends StatefulWidget {
 }
 
 class _DeviceSelectionDialogState extends State<DeviceSelectionDialog> {
-  bool isServerStarted = false;
+  late bool isServerStarted;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the server state based on the serverUrl
+    isServerStarted = widget.serverUrl != null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +80,12 @@ class _DeviceSelectionDialogState extends State<DeviceSelectionDialog> {
                           isServerStarted = true;
                         });
                         await widget.onStartServer();
-                        // No need to call setState here as the parent widget's state (serverUrl)
-                        // will trigger a rebuild of this dialog if it's still visible.
-                        // If the dialog is rebuilt due to parent changes, isServerStarted will be re-evaluated.
+                        // Fetch the updated serverUrl and refresh the UI
+                        setState(() {});
                       },
               ),
             ),
-            if (widget.serverUrl != null) ...[
+            if (isServerStarted) ...[
               SizedBox(height: 16),
               Container(
                 padding: EdgeInsets.all(16),
@@ -122,40 +128,40 @@ class _DeviceSelectionDialogState extends State<DeviceSelectionDialog> {
                         border: Border.all(color: Colors.green.shade300),
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
                             child: Text(
-                              widget.serverUrl!,
+                              widget.serverUrl ?? '',
                               style: TextStyle(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Courier',
+                                color: Colors.green.shade800,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.copy),
+                            icon: Icon(
+                              Icons.copy,
+                              color: Colors.green.shade800,
+                            ),
                             onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: widget.serverUrl!),
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('URL copied to clipboard!'),
-                                ),
-                              );
+                              final serverUrl = widget.serverUrl;
+                              if (serverUrl != null) {
+                                Clipboard.setData(
+                                  ClipboardData(text: serverUrl),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'IP address copied to clipboard!',
+                                    ),
+                                  ),
+                                );
+                              }
                             },
                           ),
                         ],
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      '• Works on phones, tablets, computers, smart TVs\n'
-                      '• Updates in real-time\n'
-                      '• Perfect for presentations and events',
-                      style: TextStyle(
-                        color: Colors.green.shade600,
-                        fontSize: 12,
                       ),
                     ),
                   ],

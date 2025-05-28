@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async'; // For TickerProviderStateMixin
 
 import 'features/goal_tracking/widgets/device_selection_dialog.dart';
-import 'features/goal_tracking/widgets/fullscreen_display.dart';
 import 'features/goal_tracking/services/server_service.dart';
 import 'core/services/goal_service.dart'; // Import GoalService
 import 'core/models/goal_model.dart'; // Import Goal model
@@ -316,7 +315,7 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                       ),
                       onTap: () {
                         addMoney(article.price);
-                        Navigator.pop(context); // Close the bottom sheet
+                        // Navigator.pop(context); // Close the bottom sheet
                       },
                     );
                   },
@@ -650,20 +649,20 @@ class _MoneyGoalTrackerState extends State<MoneyGoalTracker>
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return DeviceSelectionDialog(
-                                      onStartServer: _startWebServer,
-                                      serverUrl: _serverUrl,
-                                      onLocalDisplay: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => FullscreenDisplay(
-                                              currentAmount: currentAmount,
-                                              goalAmount:
-                                                  targetAmount, // Use targetAmount from highlighted goal
-                                              goalReached: isGoalAchieved,
-                                            ),
-                                          ),
+                                    return StatefulBuilder(
+                                      builder: (context, setState) {
+                                        return DeviceSelectionDialog(
+                                          onStartServer: () async {
+                                            await _startWebServer();
+                                            setState(
+                                              () {},
+                                            ); // Rebuild dialog with updated serverUrl
+                                          },
+                                          serverUrl: _serverUrl,
+                                          onLocalDisplay: () {
+                                            Navigator.pop(context);
+                                            // Handle local display logic
+                                          },
                                         );
                                       },
                                     );

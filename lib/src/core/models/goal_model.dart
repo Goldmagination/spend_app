@@ -1,3 +1,5 @@
+import 'article_model.dart';
+
 class Goal {
   final String id;
   String name;
@@ -35,7 +37,8 @@ class Goal {
     currentAmount: (json['currentAmount'] as num?)?.toDouble() ?? 0.0,
     isHighlighted: json['isHighlighted'] as bool? ?? false,
     paypalEmail: json['paypalEmail'] as String?,
-    articles: (json['articles'] as List<dynamic>?)
+    articles:
+        (json['articles'] as List<dynamic>?)
             ?.map((item) => Article.fromJson(item as Map<String, dynamic>))
             .toList() ??
         [],
@@ -61,6 +64,3 @@ class Goal {
     );
   }
 }
-
-// Import the Article model
-import 'article_model.dart';

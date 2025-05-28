@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:money_goal_tracker/src/core/models/goal_model.dart';
-import 'package:money_goal_tracker/src/core/services/goal_service.dart';
-import 'package:money_goal_tracker/src/features/admin_panel/screens/admin_panel_screen.dart';
-import 'package:money_goal_tracker/src/features/admin_panel/screens/add_edit_goal_screen.dart';
+import 'package:spend_app/src/core/models/goal_model.dart';
+import 'package:spend_app/src/core/services/goal_service.dart';
+import 'package:spend_app/src/features/admin_panel/screens/admin_panel_screen.dart';
+import 'package:spend_app/src/features/admin_panel/screens/add_edit_goal_screen.dart';
 
-// Generate a MockGoalService using the build_runner
-// Command to run: flutter pub run build_runner build --delete-conflicting-outputs
 @GenerateMocks([GoalService])
 import 'admin_panel_screen_test.mocks.dart'; //This will be generated
 
@@ -17,7 +15,7 @@ Widget createTestableWidget({required Widget child}) {
   return MaterialApp(
     home: child,
     // Mock navigator observers if testing navigation, or use a mock navigator
-    navigatorObservers: [], 
+    navigatorObservers: [],
   );
 }
 
@@ -26,22 +24,37 @@ void main() {
   late MockGoalService mockGoalService;
 
   // Test Goals
-  final goal1 = Goal(id: '1', name: 'Goal 1', targetAmount: 100, currentAmount: 50, isHighlighted: true);
-  final goal2 = Goal(id: '2', name: 'Goal 2', targetAmount: 200, currentAmount: 75);
+  final goal1 = Goal(
+    id: '1',
+    name: 'Goal 1',
+    targetAmount: 100,
+    currentAmount: 50,
+    isHighlighted: true,
+  );
+  final goal2 = Goal(
+    id: '2',
+    name: 'Goal 2',
+    targetAmount: 200,
+    currentAmount: 75,
+  );
 
   setUp(() {
     mockGoalService = MockGoalService();
-    
+
     // Provide a default behavior for getGoals to avoid null issues if not overridden in a test
-    when(mockGoalService.getGoals()).thenReturn([]); 
+    when(mockGoalService.getGoals()).thenReturn([]);
     // Provide default for getHighlightedGoal as AdminPanelScreen might indirectly cause its call via _loadGoals -> highlight logic.
-    when(mockGoalService.getHighlightedGoal()).thenReturn(null); 
+    when(mockGoalService.getHighlightedGoal()).thenReturn(null);
   });
 
   group('AdminPanelScreen Widget Tests', () {
-    testWidgets('Renders correctly with a list of mock goals', (WidgetTester tester) async {
+    testWidgets('Renders correctly with a list of mock goals', (
+      WidgetTester tester,
+    ) async {
       when(mockGoalService.getGoals()).thenReturn([goal1, goal2]);
-      when(mockGoalService.getHighlightedGoal()).thenReturn(goal1); // Assume goal1 is highlighted
+      when(
+        mockGoalService.getHighlightedGoal(),
+      ).thenReturn(goal1); // Assume goal1 is highlighted
 
       // Inject the mock service. This is the tricky part without a proper DI framework.
       // For this test, we assume AdminPanelScreen uses a global/singleton GoalService.
@@ -64,18 +77,20 @@ void main() {
       // behavior and simply stub the methods on the mock instance.
       // Let's assume GoalService() in AdminPanelScreen gets our stubbed responses.
       // This is a common pitfall when testing singletons directly.
-      
+
       // The GoalService uses a singleton pattern. The AdminPanelScreen will create its own instance.
       // To test this properly, the GoalService should be injectable.
       // For now, we cannot truly inject the mock into AdminPanelScreen as it's written.
       // The test will interact with the *actual* GoalService.
       // We will clear goals in the actual service and add our test goals.
-      
+
       final realGoalService = GoalService();
       // Clear existing goals from real service
       var currentGoals = realGoalService.getGoals();
-      for(var g in List.from(currentGoals)) { realGoalService.deleteGoal(g.id); }
-      
+      for (var g in List.from(currentGoals)) {
+        realGoalService.deleteGoal(g.id);
+      }
+
       // Add our mock goals to the real service for this test
       realGoalService.addGoal(goal1);
       realGoalService.addGoal(goal2);
@@ -89,23 +104,32 @@ void main() {
       expect(find.byIcon(Icons.star), findsOneWidget); // Highlighted goal1
     });
 
-    testWidgets('Displays empty state message if there are no goals', (WidgetTester tester) async {
+    testWidgets('Displays empty state message if there are no goals', (
+      WidgetTester tester,
+    ) async {
       // Ensure the real GoalService is empty for this test
       final realGoalService = GoalService();
       var currentGoals = realGoalService.getGoals();
-      for(var g in List.from(currentGoals)) { realGoalService.deleteGoal(g.id); }
+      for (var g in List.from(currentGoals)) {
+        realGoalService.deleteGoal(g.id);
+      }
 
       await tester.pumpWidget(createTestableWidget(child: AdminPanelScreen()));
       await tester.pumpAndSettle();
 
       expect(find.text('No goals yet.'), findsOneWidget);
-      expect(find.text('Tap the "+" button to add your first goal.'), findsOneWidget);
+      expect(
+        find.text('Tap the "+" button to add your first goal.'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('Tapping FAB navigates to AddEditGoalScreen', (WidgetTester tester) async {
+    testWidgets('Tapping FAB navigates to AddEditGoalScreen', (
+      WidgetTester tester,
+    ) async {
       // As before, this will use the real GoalService.
       // Navigation testing needs a bit more setup.
-      
+
       // Create a mock navigator observer
       final mockObserver = MockNavigatorObserver();
 
@@ -114,9 +138,7 @@ void main() {
           home: AdminPanelScreen(),
           navigatorObservers: [mockObserver],
           // Define a route for AddEditGoalScreen for the navigator to use
-          routes: {
-            '/addEditGoal': (context) => AddEditGoalScreen(),
-          },
+          routes: {'/addEditGoal': (context) => AddEditGoalScreen()},
         ),
       );
       await tester.pumpAndSettle();
@@ -130,7 +152,7 @@ void main() {
       // For simplicity, we check if AddEditGoalScreen is now present.
       expect(find.byType(AddEditGoalScreen), findsOneWidget);
     });
-    
+
     // The following tests for delete/highlight are challenging without proper DI
     // for GoalService. They would currently operate on the *real* GoalService.
     // To truly test the interaction (i.e., that AdminPanelScreen *calls* the service methods),
@@ -140,16 +162,24 @@ void main() {
     // acknowledging this limitation in the current app structure.
     // If we run these, they will modify the actual singleton GoalService state.
 
-    testWidgets('Tapping "Delete" calls deleteGoal on GoalService', (WidgetTester tester) async {
+    testWidgets('Tapping "Delete" calls deleteGoal on GoalService', (
+      WidgetTester tester,
+    ) async {
       // This test requires GoalService to be truly mockable and injected.
       // We will simulate by checking the side-effect on the real service.
       final realGoalService = GoalService();
       var currentGoals = realGoalService.getGoals();
-      for(var g in List.from(currentGoals)) { realGoalService.deleteGoal(g.id); }
-      
-      final tempGoal = Goal(id: 'temp_del', name: 'Delete Me', targetAmount: 10);
+      for (var g in List.from(currentGoals)) {
+        realGoalService.deleteGoal(g.id);
+      }
+
+      final tempGoal = Goal(
+        id: 'temp_del',
+        name: 'Delete Me',
+        targetAmount: 10,
+      );
       realGoalService.addGoal(tempGoal);
-      
+
       await tester.pumpWidget(createTestableWidget(child: AdminPanelScreen()));
       await tester.pumpAndSettle();
 
@@ -157,10 +187,10 @@ void main() {
       // Find the delete icon for 'Delete Me' goal. This can be tricky.
       // Assuming it's the first (and only) goal for simplicity here.
       expect(find.byIcon(Icons.delete_outline), findsOneWidget);
-      
+
       await tester.tap(find.byIcon(Icons.delete_outline));
       await tester.pumpAndSettle(); // For the dialog
-      
+
       // Confirm deletion dialog
       expect(find.text('Confirm Delete'), findsOneWidget);
       await tester.tap(find.text('Delete'));
@@ -172,17 +202,33 @@ void main() {
       expect(find.text('Delete Me'), findsNothing);
     });
 
-    testWidgets('Tapping "Highlight" calls highlightGoal on GoalService', (WidgetTester tester) async {
+    testWidgets('Tapping "Highlight" calls highlightGoal on GoalService', (
+      WidgetTester tester,
+    ) async {
       // Similar to delete, this tests side-effects on the real service.
       final realGoalService = GoalService();
       var currentGoals = realGoalService.getGoals();
-      for(var g in List.from(currentGoals)) { realGoalService.deleteGoal(g.id); }
+      for (var g in List.from(currentGoals)) {
+        realGoalService.deleteGoal(g.id);
+      }
 
-      final goalToHighlight = Goal(id: 'highlight_me', name: 'Highlight Test', targetAmount: 100, isHighlighted: false);
-      final otherGoal = Goal(id: 'other', name: 'Other Goal', targetAmount: 50, isHighlighted: true);
+      final goalToHighlight = Goal(
+        id: 'highlight_me',
+        name: 'Highlight Test',
+        targetAmount: 100,
+        isHighlighted: false,
+      );
+      final otherGoal = Goal(
+        id: 'other',
+        name: 'Other Goal',
+        targetAmount: 50,
+        isHighlighted: true,
+      );
       realGoalService.addGoal(otherGoal); // Add an already highlighted goal
       realGoalService.addGoal(goalToHighlight);
-      realGoalService.highlightGoal(otherGoal.id); // Ensure otherGoal is initially highlighted
+      realGoalService.highlightGoal(
+        otherGoal.id,
+      ); // Ensure otherGoal is initially highlighted
 
       await tester.pumpWidget(createTestableWidget(child: AdminPanelScreen()));
       await tester.pumpAndSettle();
@@ -190,25 +236,36 @@ void main() {
       expect(find.text('Highlight Test'), findsOneWidget);
       // Find the star_border icon for 'Highlight Test'
       final highlightButtonFinder = find.byWidgetPredicate(
-        (Widget widget) => widget is IconButton && widget.tooltip == 'Highlight' && widget.icon is Icon && (widget.icon as Icon).icon == Icons.star_border,
+        (Widget widget) =>
+            widget is IconButton &&
+            widget.tooltip == 'Highlight' &&
+            widget.icon is Icon &&
+            (widget.icon as Icon).icon == Icons.star_border,
       );
       expect(highlightButtonFinder, findsOneWidget);
-      
+
       await tester.tap(highlightButtonFinder);
       await tester.pumpAndSettle();
 
       // Verify goalToHighlight is now highlighted in the service
       expect(realGoalService.getHighlightedGoal()?.id, 'highlight_me');
-      expect(realGoalService.getGoalById('highlight_me')?.isHighlighted, isTrue);
+      expect(
+        realGoalService.getGoalById('highlight_me')?.isHighlighted,
+        isTrue,
+      );
       expect(realGoalService.getGoalById('other')?.isHighlighted, isFalse);
 
       // Verify UI update (icon changes to star)
-       final highlightedIconFinder = find.byWidgetPredicate(
-        (Widget widget) => widget is IconButton && widget.tooltip == 'Unhighlight' && widget.icon is Icon && (widget.icon as Icon).icon == Icons.star,
+      final highlightedIconFinder = find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is IconButton &&
+            widget.tooltip == 'Unhighlight' &&
+            widget.icon is Icon &&
+            (widget.icon as Icon).icon == Icons.star,
       );
       // This check needs to be specific to the 'Highlight Test' list tile.
       // For simplicity, if only one star icon is present, it's likely the one.
-      expect(highlightedIconFinder, findsOneWidget); 
+      expect(highlightedIconFinder, findsOneWidget);
     });
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class FullscreenDisplay extends StatefulWidget {
   final double currentAmount;
@@ -87,25 +88,39 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                 // Sparkle effects for goal reached
                 if (widget.goalReached)
                   ...List.generate(20, (index) {
-                    final random = Random(); // Ensure Random is available or pass it
+                    final random =
+                        Random(); // Ensure Random is available or pass it
                     return AnimatedBuilder(
                       animation: _sparkleAnimation,
                       builder: (context, child) {
                         return Positioned(
                           left:
                               MediaQuery.of(context).size.width *
-                              (random.nextDouble() * 0.8 + 0.1), // More random distribution
+                              (random.nextDouble() * 0.8 +
+                                  0.1), // More random distribution
                           top:
                               MediaQuery.of(context).size.height *
-                              (random.nextDouble() * 0.8 + 0.1), // More random distribution
+                              (random.nextDouble() * 0.8 +
+                                  0.1), // More random distribution
                           child: Transform.rotate(
-                            angle: _sparkleAnimation.value * 6.28 * (random.nextBool() ? 1 : -1) * (random.nextDouble() * 0.5 + 0.5), // Random direction and speed
+                            angle:
+                                _sparkleAnimation.value *
+                                6.28 *
+                                (random.nextBool() ? 1 : -1) *
+                                (random.nextDouble() * 0.5 +
+                                    0.5), // Random direction and speed
                             child: Opacity(
-                              opacity: (1.0 - _sparkleAnimation.value).abs().clamp(0.0, 1.0),
+                              opacity: (1.0 - _sparkleAnimation.value)
+                                  .abs()
+                                  .clamp(0.0, 1.0),
                               child: Icon(
                                 Icons.star,
-                                color: Colors.yellow.shade300.withOpacity(random.nextDouble() * 0.5 + 0.5), // Random opacity
-                                size: 20 + (random.nextDouble() * 20), // Random size
+                                color: Colors.yellow.shade300.withOpacity(
+                                  random.nextDouble() * 0.5 + 0.5,
+                                ), // Random opacity
+                                size:
+                                    20 +
+                                    (random.nextDouble() * 20), // Random size
                               ),
                             ),
                           ),
@@ -131,7 +146,8 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                                 letterSpacing: 8,
-                                shadows: [ // Add shadow for better readability
+                                shadows: [
+                                  // Add shadow for better readability
                                   Shadow(
                                     blurRadius: 10.0,
                                     color: Colors.black.withOpacity(0.5),
@@ -172,10 +188,12 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                         color: widget.goalReached
                                             ? Colors.greenAccent
                                             : Colors.purpleAccent,
-                                         shadows: [
+                                        shadows: [
                                           Shadow(
                                             blurRadius: 8.0,
-                                            color: Colors.black.withOpacity(0.7),
+                                            color: Colors.black.withOpacity(
+                                              0.7,
+                                            ),
                                             offset: Offset(1.0, 1.0),
                                           ),
                                         ],
@@ -200,7 +218,9 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                         shadows: [
                                           Shadow(
                                             blurRadius: 6.0,
-                                            color: Colors.black.withOpacity(0.7),
+                                            color: Colors.black.withOpacity(
+                                              0.7,
+                                            ),
                                             offset: Offset(1.0, 1.0),
                                           ),
                                         ],
@@ -225,9 +245,12 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
                                     color: Colors.greenAccent,
                                     width: 3,
                                   ),
-                                  boxShadow: [ // Add glow effect
+                                  boxShadow: [
+                                    // Add glow effect
                                     BoxShadow(
-                                      color: Colors.greenAccent.withOpacity(0.5),
+                                      color: Colors.greenAccent.withOpacity(
+                                        0.5,
+                                      ),
                                       blurRadius: 20.0,
                                       spreadRadius: 5.0,
                                     ),
@@ -287,6 +310,3 @@ class _FullscreenDisplayState extends State<FullscreenDisplay>
     );
   }
 }
-
-// Need to import Random for sparkle effect
-import 'dart:math';
